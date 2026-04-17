@@ -1,11 +1,46 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import '../models/consultation.dart';
+import '../services/auth_service.dart';
+import '../services/api_service.dart';
 import '../widgets/section_card.dart';
 
 class ConsultationDetailScreen extends StatelessWidget {
   final Consultation consultation;
 
   const ConsultationDetailScreen({super.key, required this.consultation});
+
+  Future<void> _downloadAndOpen(BuildContext context, String filename) async {
+    final auth = context.read<AuthService>();
+    final api = ApiService(auth.token!);
+
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Téléchargement en cours...')),
+      );
+
+      final response = await api.downloadConsultationFile(consultation.id!, filename);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/$filename');
+      await file.writeAsBytes(response.bodyBytes);
+
+      final result = await OpenFilex.open(file.path);
+      if (result.type != ResultType.done && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Impossible d\'ouvrir le fichier: ${result.message}')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +83,8 @@ class ConsultationDetailScreen extends StatelessWidget {
                           dense: true,
                           leading: const Icon(Icons.attach_file),
                           title: Text(f, overflow: TextOverflow.ellipsis),
+                          trailing: const Icon(Icons.download, size: 20),
+                          onTap: () => _downloadAndOpen(context, f),
                         ))
                     .toList(),
               ),

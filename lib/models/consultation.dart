@@ -4,6 +4,7 @@ class Consultation {
   final String? patientIri;
   final String date;
   final String practitionerName;
+  final String? createdByName;
   final String? typeName;
   final String? typeIri;
   final String observations;
@@ -17,7 +18,8 @@ class Consultation {
     this.patientId,
     this.patientIri,
     required this.date,
-    required this.practitionerName,
+    this.practitionerName = '',
+    this.createdByName,
     this.typeName,
     this.typeIri,
     required this.observations,
@@ -34,6 +36,7 @@ class Consultation {
       patientIri: _extractIri(json['patient']),
       date: json['date'] as String? ?? '',
       practitionerName: json['practitionerName'] as String? ?? '',
+      createdByName: json['createdByName'] as String?,
       typeName: _extractLabel(json['type']),
       typeIri: _extractIri(json['type']),
       observations: json['observations'] as String? ?? '',
@@ -47,7 +50,6 @@ class Consultation {
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{
       'date': date,
-      'practitionerName': practitionerName,
       'observations': observations,
     };
     if (patientIri != null) data['patient'] = patientIri;
@@ -55,6 +57,10 @@ class Consultation {
     if (treatmentNotes != null) data['treatmentNotes'] = treatmentNotes;
     if (nextAppointmentDate != null) {
       data['nextAppointmentDate'] = nextAppointmentDate;
+    }
+    // Only send practitionerName if explicitly provided (e.g. by a nurse selecting a doctor)
+    if (practitionerName.isNotEmpty) {
+      data['practitionerName'] = practitionerName;
     }
     return data;
   }

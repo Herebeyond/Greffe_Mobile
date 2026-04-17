@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'utils/platform_imports.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,7 +7,7 @@ import 'services/auth_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 
-/// Accepts self-signed certificates in development builds only.
+/// Accepts self-signed certificates in development/Docker builds.
 class _DevHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -17,8 +17,9 @@ class _DevHttpOverrides extends HttpOverrides {
 }
 
 void main() {
-  // Allow self-signed HTTPS in debug/profile mode (dev server).
-  if (kDebugMode) {
+  // Allow self-signed HTTPS in debug mode OR when built with ALLOW_SELF_SIGNED=true.
+  const allowSelfSigned = bool.fromEnvironment('ALLOW_SELF_SIGNED', defaultValue: false);
+  if (kDebugMode || allowSelfSigned) {
     HttpOverrides.global = _DevHttpOverrides();
   }
 

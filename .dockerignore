@@ -1,0 +1,27 @@
+# ── Build artefacts ──
+build/
+.dart_tool/
+.packages
+
+# ── IDE / OS ──
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Platform folders (not needed for APK build) ──
+ios/
+macos/
+linux/
+windows/
+web/
+
+# ── Tests ──
+test/
+
+# ── Misc ──
+.git/
+*.md

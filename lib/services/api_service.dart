@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import '../utils/platform_imports.dart';
 import 'package:http/http.dart' as http;
 import '../config.dart';
 import '../models/patient.dart';
@@ -71,6 +71,36 @@ class ApiService {
 
   Future<Patient> getPatient(int id) =>
       _getItem('/patients/$id', Patient.fromJson);
+
+  /// Returns doctors linked to a patient (for nurse practitioner picker).
+  Future<List<Map<String, dynamic>>> getPatientDoctors(int patientId) async {
+    final uri = Uri.parse('${AppConfig.apiUrl}/patients/$patientId/doctors');
+    final response = await http.get(uri, headers: _headers);
+    _checkAuth(response);
+    if (response.statusCode != 200) {
+      throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
+    }
+    final data = jsonDecode(response.body);
+    if (data is List) {
+      return data.cast<Map<String, dynamic>>();
+    }
+    return [];
+  }
+
+  // ─── Reference Data ────────────────────────────────────────────────
+
+  /// Fetch all consultation types (unpaginated).
+  Future<List<Map<String, dynamic>>> getConsultationTypes() async {
+    final uri = Uri.parse('${AppConfig.apiUrl}/consultation_types');
+    final response = await http.get(uri, headers: _headers);
+    _checkAuth(response);
+    if (response.statusCode != 200) {
+      throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
+    }
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
+    return items.cast<Map<String, dynamic>>();
+  }
 
   // ─── Consultations ─────────────────────────────────────────────────
 
@@ -251,6 +281,23 @@ class ApiService {
   Future<int> getUnreadNotificationCount() async {
     final notifications = await getNotifications(page: 1);
     return notifications.where((n) => !n.isRead).length;
+  }
+
+  // ─── File Downloads ────────────────────────────────────────────────
+
+  /// Download a consultation attachment file and return raw bytes.
+  Future<http.Response> downloadConsultationFile(int consultationId, String filename) async {
+    final uri = Uri.parse(
+      '${AppConfig.apiUrl}/consultations/$consultationId/download/$filename',
+    );
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $_token',
+    });
+    _checkAuth(response);
+    if (response.statusCode != 200) {
+      throw ApiException('Erreur de téléchargement (${response.statusCode})', response.statusCode);
+    }
+    return response;
   }
 }
 
