@@ -1,3 +1,6 @@
+import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,11 +8,22 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Load signing properties if the key.properties file exists
+// Load signing properties if the key.properties file exists AND the keystore
+// file it points to is actually present on disk. This allows the same project
+// to be built on a developer machine with a real keystore (release-signed APK)
+// and inside a Docker/CI container without the keystore (falls back to the
+// debug signing config so the build still succeeds).
 val keyPropertiesFile = rootProject.file("key.properties")
-val keyProperties = java.util.Properties()
+val keyProperties = Properties()
+var keystoreAvailable = false
 if (keyPropertiesFile.exists()) {
     keyPropertiesFile.inputStream().use { keyProperties.load(it) }
+    val storeFilePath = keyProperties.getProperty("storeFile")
+    if (storeFilePath != null && file(storeFilePath).exists()) {
+        keystoreAvailable = true
+    } else {
+        logger.warn("key.properties found but storeFile '$storeFilePath' is missing — falling back to debug signing.")
+    }
 }
 
 android {
@@ -22,17 +36,19 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
     signingConfigs {
-        if (keyPropertiesFile.exists()) {
+        if (keystoreAvailable) {
             create("release") {
-                keyAlias = keyProperties["keyAlias"] as String
-                keyPassword = keyProperties["keyPassword"] as String
-                storeFile = file(keyProperties["storeFile"] as String)
-                storePassword = keyProperties["storePassword"] as String
+                keyAlias = keyProperties.getProperty("keyAlias")
+                keyPassword = keyProperties.getProperty("keyPassword")
+                storeFile = file(keyProperties.getProperty("storeFile"))
+                storePassword = keyProperties.getProperty("storePassword")
             }
         }
     }
@@ -47,7 +63,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (keyPropertiesFile.exists())
+            signingConfig = if (keystoreAvailable)
                 signingConfigs.getByName("release")
             else
                 signingConfigs.getByName("debug")

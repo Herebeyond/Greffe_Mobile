@@ -1,30 +1,41 @@
 /// Application configuration.
 ///
-/// Change [baseUrl] to your server's local IP when testing on a real device.
-/// Example: https://192.168.1.42
+/// The API base URL can be:
+/// - **Web**: auto-detected from the browser hostname.
+/// - **Native**: read from secure storage (set by the user in the login screen)
+///   or, as a fallback, the compile-time `--dart-define=API_BASE_URL=...` value.
+///
+/// Use `ServerConfigService` to load/save the runtime override.
 library;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AppConfig {
-  /// Base URL of the Symfony API (no trailing slash).
-  ///
-  /// - **Web**: auto-detected from the browser's current hostname so the app
-  ///   works from any device (PC, phone, tablet) without rebuilding.
-  /// - **Native**: uses --dart-define=API_BASE_URL or falls back to the
-  ///   PC hotspot IP.
+  /// Compile-time default for native builds (used when no runtime override is set).
+  static const String _nativeDefault = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://192.168.137.1',
+  );
+
+  /// Optional runtime override, set by ServerConfigService from secure storage.
+  static String? _baseUrlOverride;
+
+  /// Effective base URL (no trailing slash).
   static String get baseUrl {
     if (kIsWeb) {
       // Use the same hostname the browser loaded from → works from PC and phone.
       return 'https://${Uri.base.host}';
     }
-    return _nativeBaseUrl;
+    return _baseUrlOverride ?? _nativeDefault;
   }
 
-  /// Compile-time constant for native builds only.
-  static const String _nativeBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'https://192.168.137.1',
-  );
+  /// Whether a user-defined override is currently active.
+  static bool get hasBaseUrlOverride => _baseUrlOverride != null;
+
+  /// Sets (or clears with `null`) the runtime base URL override.
+  /// Should only be called by ServerConfigService.
+  static void setBaseUrlOverride(String? url) {
+    _baseUrlOverride = (url == null || url.isEmpty) ? null : url;
+  }
 
   /// API prefix.
   static const String apiPrefix = '/api';

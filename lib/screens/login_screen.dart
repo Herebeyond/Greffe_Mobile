@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/server_config_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,9 +38,63 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _editServerUrl() async {
+    final config = context.read<ServerConfigService>();
+    final controller = TextEditingController(text: config.current);
+    final newUrl = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Adresse du serveur'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Saisissez l\'URL publique du serveur (ex. ngrok).\n'
+              'Laissez vide pour revenir à la valeur par défaut.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                hintText: 'https://xxxx-xx-xx-xx-xx.ngrok-free.app',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(''),
+            child: const Text('Réinitialiser'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text),
+            child: const Text('Valider'),
+          ),
+        ],
+      ),
+    );
+    if (newUrl == null) return; // cancelled
+    await config.save(newUrl);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Serveur : ${config.current}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
+    final config = context.watch<ServerConfigService>();
 
     return Scaffold(
       body: Center(
@@ -71,6 +127,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  if (!kIsWeb)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: OutlinedButton.icon(
+                        onPressed: _editServerUrl,
+                        icon: const Icon(Icons.dns_outlined, size: 18),
+                        label: Text(
+                          'Serveur : ${config.current}',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(40),
+                          alignment: Alignment.centerLeft,
+                        ),
+                      ),
+                    ),
                   if (_error != null)
                     Container(
                       width: double.infinity,
