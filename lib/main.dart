@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
+import 'services/server_config_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 
@@ -24,8 +25,11 @@ void main() {
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthService(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ServerConfigService()),
+        ChangeNotifierProvider(create: (_) => AuthService()),
+      ],
       child: const GreffeRenaleApp(),
     ),
   );
@@ -48,6 +52,9 @@ class _GreffeRenaleAppState extends State<GreffeRenaleApp> {
   }
 
   Future<void> _init() async {
+    // Load the persisted API base URL FIRST so any HTTP call uses the
+    // user-chosen server (e.g. an ngrok URL).
+    await context.read<ServerConfigService>().load();
     await context.read<AuthService>().tryAutoLogin();
     if (mounted) setState(() => _initialized = true);
   }
