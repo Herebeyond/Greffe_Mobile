@@ -3,6 +3,10 @@ build/
 .dart_tool/
 .packages
 
+# Keep the prebuilt APK so Dockerfile.prebuilt can ship it.
+!prebuilt/
+!prebuilt/app-release.apk
+
 # ── IDE / OS ──
 .idea/
 *.iml

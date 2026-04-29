@@ -1,0 +1,14 @@
+# ── Lightweight: serve a prebuilt APK ──────────────────────────────
+# Build the APK on a developer machine first:
+#   flutter build apk --release \
+#     --dart-define=API_BASE_URL=https://10.187.22.27 \
+#     --dart-define=ALLOW_SELF_SIGNED=true
+# Then copy build/app/outputs/flutter-apk/app-release.apk to:
+#   prebuilt/app-release.apk
+FROM nginx:alpine
+
+COPY prebuilt/app-release.apk /usr/share/nginx/html/greffe-renale.apk
+COPY download.html /usr/share/nginx/html/index.html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
