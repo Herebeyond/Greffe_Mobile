@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Allow self-signed certificates for the development server -->
-    <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="false">192.168.137.1</domain>
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system"/>
             <certificates src="user"/>
         </trust-anchors>
+    </base-config>
+
+    <!-- Allow HTTP access on local/private dev servers used by mobile testing -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.187.22.27</domain>
+        <domain includeSubdomains="false">192.168.137.1</domain>
     </domain-config>
 </network-security-config>
