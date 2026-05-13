@@ -48,7 +48,7 @@ class AuthService extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         _token = data['token'] as String?;
         _fullName = data['fullName'] as String?;
         final rawRoles = data['roles'];

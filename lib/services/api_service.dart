@@ -39,7 +39,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
     return items.map((e) => fromJson(e as Map<String, dynamic>)).toList();
   }
@@ -55,7 +55,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    return fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return fromJson(jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>);
   }
 
   void _checkAuth(http.Response response) {
@@ -80,7 +80,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(utf8.decode(response.bodyBytes));
     if (data is List) {
       return data.cast<Map<String, dynamic>>();
     }
@@ -97,7 +97,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
     return items.cast<Map<String, dynamic>>();
   }
@@ -116,7 +116,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
     return items.map((e) => Consultation.fromJson(e as Map<String, dynamic>)).toList();
   }
@@ -138,7 +138,7 @@ class ApiService {
         response.statusCode,
       );
     }
-    return Consultation.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return Consultation.fromJson(jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>);
   }
 
   Future<Consultation> updateConsultation(int id, Consultation consultation) async {
@@ -155,7 +155,7 @@ class ApiService {
         response.statusCode,
       );
     }
-    return Consultation.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return Consultation.fromJson(jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>);
   }
 
   /// Upload a file to a consultation.
@@ -189,7 +189,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
     return items.map((e) => BiologicalResult.fromJson(e as Map<String, dynamic>)).toList();
   }
@@ -208,7 +208,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
     return items.map((e) => MedicalHistory.fromJson(e as Map<String, dynamic>)).toList();
   }
@@ -224,7 +224,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
     return items.map((e) => TherapeuticEducation.fromJson(e as Map<String, dynamic>)).toList();
   }
@@ -240,7 +240,7 @@ class ApiService {
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final items = (data['hydra:member'] as List?) ?? (data['member'] as List?) ?? [];
     return items.map((e) => Transplant.fromJson(e as Map<String, dynamic>)).toList();
   }
