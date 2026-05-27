@@ -13,7 +13,7 @@ class AppConfig {
   /// Compile-time default for native builds (used when no runtime override is set).
   static const String _nativeDefault = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.187.22.27',
+    defaultValue: 'https://std27.beaupeyrat.com',
   );
 
   /// Optional runtime override, set by ServerConfigService from secure storage.
