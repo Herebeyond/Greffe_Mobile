@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import '../utils/platform_imports.dart';
 import 'package:http/http.dart' as http;
 import '../config.dart';
@@ -14,6 +15,7 @@ import '../models/notification.dart';
 /// Centralises all API calls. Requires a valid JWT token.
 class ApiService {
   final String _token;
+  final Duration _requestTimeout = const Duration(seconds: AppConfig.requestTimeoutSeconds);
 
   ApiService(this._token);
 
@@ -25,6 +27,26 @@ class ApiService {
 
   // ─── Helpers ───────────────────────────────────────────────────────
 
+  Future<http.Response> _get(Uri uri, {Map<String, String>? headers}) {
+    return http.get(uri, headers: headers).timeout(_requestTimeout);
+  }
+
+  Future<http.Response> _post(Uri uri, {Map<String, String>? headers, Object? body}) {
+    return http.post(uri, headers: headers, body: body).timeout(_requestTimeout);
+  }
+
+  Future<http.Response> _put(Uri uri, {Map<String, String>? headers, Object? body}) {
+    return http.put(uri, headers: headers, body: body).timeout(_requestTimeout);
+  }
+
+  Future<http.Response> _patch(Uri uri, {Map<String, String>? headers, Object? body}) {
+    return http.patch(uri, headers: headers, body: body).timeout(_requestTimeout);
+  }
+
+  Never _throwTimeout() {
+    throw ApiException('Le serveur ne répond pas (délai dépassé).', 0);
+  }
+
   /// Generic GET that returns a list of items parsed by [fromJson].
   Future<List<T>> _getCollection<T>(
     String path,
@@ -34,7 +56,7 @@ class ApiService {
     final uri = Uri.parse('${AppConfig.apiUrl}$path').replace(
       queryParameters: {'page': page.toString()},
     );
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -50,7 +72,7 @@ class ApiService {
     T Function(Map<String, dynamic>) fromJson,
   ) async {
     final uri = Uri.parse('${AppConfig.apiUrl}$path');
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -75,7 +97,7 @@ class ApiService {
   /// Returns doctors linked to a patient (for nurse practitioner picker).
   Future<List<Map<String, dynamic>>> getPatientDoctors(int patientId) async {
     final uri = Uri.parse('${AppConfig.apiUrl}/patients/$patientId/doctors');
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -92,7 +114,7 @@ class ApiService {
   /// Fetch all consultation types (unpaginated).
   Future<List<Map<String, dynamic>>> getConsultationTypes() async {
     final uri = Uri.parse('${AppConfig.apiUrl}/consultation_types');
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -111,7 +133,7 @@ class ApiService {
       queryParams['patient'] = patientId.toString();
     }
     final uri = Uri.parse('${AppConfig.apiUrl}$path').replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -126,11 +148,11 @@ class ApiService {
 
   Future<Consultation> createConsultation(Consultation consultation) async {
     final uri = Uri.parse('${AppConfig.apiUrl}/consultations');
-    final response = await http.post(
+    final response = await _post(
       uri,
       headers: _headers,
       body: jsonEncode(consultation.toJson()),
-    );
+    ).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 201) {
       throw ApiException(
@@ -143,11 +165,11 @@ class ApiService {
 
   Future<Consultation> updateConsultation(int id, Consultation consultation) async {
     final uri = Uri.parse('${AppConfig.apiUrl}/consultations/$id');
-    final response = await http.put(
+    final response = await _put(
       uri,
       headers: _headers,
       body: jsonEncode(consultation.toJson()),
-    );
+    ).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException(
@@ -167,7 +189,7 @@ class ApiService {
       ..headers['Authorization'] = 'Bearer $_token'
       ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
-    final streamed = await request.send();
+    final streamed = await request.send().timeout(_requestTimeout).onError<TimeoutException>((_, __) => _throwTimeout());
     final response = await http.Response.fromStream(streamed);
     _checkAuth(response);
     if (response.statusCode != 201) {
@@ -184,7 +206,7 @@ class ApiService {
     final queryParams = <String, String>{'page': page.toString()};
     if (patientId != null) queryParams['patient'] = patientId.toString();
     final uri = Uri.parse('${AppConfig.apiUrl}/biological_results').replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -203,7 +225,7 @@ class ApiService {
     final queryParams = <String, String>{'page': page.toString()};
     if (patientId != null) queryParams['patient'] = patientId.toString();
     final uri = Uri.parse('${AppConfig.apiUrl}/medical_histories').replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -219,7 +241,7 @@ class ApiService {
     final queryParams = <String, String>{'page': page.toString()};
     if (patientId != null) queryParams['patient'] = patientId.toString();
     final uri = Uri.parse('${AppConfig.apiUrl}/therapeutic_educations').replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -235,7 +257,7 @@ class ApiService {
     final queryParams = <String, String>{'page': page.toString()};
     if (patientId != null) queryParams['patient'] = patientId.toString();
     final uri = Uri.parse('${AppConfig.apiUrl}/transplants').replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final response = await _get(uri, headers: _headers).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur serveur (${response.statusCode})', response.statusCode);
@@ -263,7 +285,7 @@ class ApiService {
 
   Future<void> markNotificationRead(int id) async {
     final uri = Uri.parse('${AppConfig.apiUrl}/notifications/$id');
-    final response = await http.patch(
+    final response = await _patch(
       uri,
       headers: {
         'Authorization': 'Bearer $_token',
@@ -271,7 +293,7 @@ class ApiService {
         'Content-Type': 'application/merge-patch+json',
       },
       body: jsonEncode({'isRead': true}),
-    );
+    ).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur (${response.statusCode})', response.statusCode);
@@ -290,9 +312,9 @@ class ApiService {
     final uri = Uri.parse(
       '${AppConfig.apiUrl}/consultations/$consultationId/download/$filename',
     );
-    final response = await http.get(uri, headers: {
+    final response = await _get(uri, headers: {
       'Authorization': 'Bearer $_token',
-    });
+    }).onError<TimeoutException>((_, __) => _throwTimeout());
     _checkAuth(response);
     if (response.statusCode != 200) {
       throw ApiException('Erreur de téléchargement (${response.statusCode})', response.statusCode);

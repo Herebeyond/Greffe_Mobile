@@ -51,4 +51,7 @@ class AppConfig {
 
   /// Notification items per page.
   static const int notificationsPerPage = 30;
+
+  /// Max HTTP request duration before failing with a user-facing error.
+  static const int requestTimeoutSeconds = 15;
 }
