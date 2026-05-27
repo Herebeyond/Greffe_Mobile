@@ -24,16 +24,22 @@ class AuthService extends ChangeNotifier {
 
   /// Try to restore a previously stored token on app start.
   Future<void> tryAutoLogin() async {
-    final stored = await _storage.read(key: AppConfig.tokenKey);
-    final storedName = await _storage.read(key: '${AppConfig.tokenKey}_fullName');
-    final storedRoles = await _storage.read(key: '${AppConfig.tokenKey}_roles');
-    if (stored != null) {
-      _token = stored;
-      _fullName = storedName;
-      if (storedRoles != null) {
-        _roles = storedRoles.split(',').where((r) => r.isNotEmpty).toList();
+    try {
+      final stored = await _storage.read(key: AppConfig.tokenKey);
+      final storedName = await _storage.read(key: '${AppConfig.tokenKey}_fullName');
+      final storedRoles = await _storage.read(key: '${AppConfig.tokenKey}_roles');
+      if (stored != null) {
+        _token = stored;
+        _fullName = storedName;
+        if (storedRoles != null) {
+          _roles = storedRoles.split(',').where((r) => r.isNotEmpty).toList();
+        }
+        notifyListeners();
       }
-      notifyListeners();
+    } catch (_) {
+      _token = null;
+      _fullName = null;
+      _roles = [];
     }
   }
 

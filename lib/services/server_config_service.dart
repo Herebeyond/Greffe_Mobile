@@ -14,9 +14,13 @@ class ServerConfigService extends ChangeNotifier {
   /// Loads the persisted URL (if any) into [AppConfig].
   Future<void> load() async {
     if (kIsWeb) return;
-    final stored = await _storage.read(key: _storageKey);
-    if (stored != null && stored.isNotEmpty) {
-      AppConfig.setBaseUrlOverride(stored);
+    try {
+      final stored = await _storage.read(key: _storageKey);
+      if (stored != null && stored.isNotEmpty) {
+        AppConfig.setBaseUrlOverride(stored);
+      }
+    } catch (_) {
+      // Keep default URL when secure storage is unavailable.
     }
     notifyListeners();
   }
@@ -27,12 +31,17 @@ class ServerConfigService extends ChangeNotifier {
   /// compile-time default.
   Future<void> save(String url) async {
     final trimmed = _normalize(url);
-    if (trimmed.isEmpty) {
-      await _storage.delete(key: _storageKey);
-      AppConfig.setBaseUrlOverride(null);
-    } else {
-      await _storage.write(key: _storageKey, value: trimmed);
-      AppConfig.setBaseUrlOverride(trimmed);
+    try {
+      if (trimmed.isEmpty) {
+        await _storage.delete(key: _storageKey);
+        AppConfig.setBaseUrlOverride(null);
+      } else {
+        await _storage.write(key: _storageKey, value: trimmed);
+        AppConfig.setBaseUrlOverride(trimmed);
+      }
+    } catch (_) {
+      // Still apply in-memory URL for the current session.
+      AppConfig.setBaseUrlOverride(trimmed.isEmpty ? null : trimmed);
     }
     notifyListeners();
   }
