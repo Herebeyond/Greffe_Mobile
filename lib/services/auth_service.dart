@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,7 @@ class AuthService extends ChangeNotifier {
   String? _fullName;
   List<String> _roles = [];
   bool _isLoading = false;
+  final Duration _requestTimeout = const Duration(seconds: AppConfig.requestTimeoutSeconds);
 
   String? get token => _token;
   String? get fullName => _fullName;
@@ -22,16 +24,22 @@ class AuthService extends ChangeNotifier {
 
   /// Try to restore a previously stored token on app start.
   Future<void> tryAutoLogin() async {
-    final stored = await _storage.read(key: AppConfig.tokenKey);
-    final storedName = await _storage.read(key: '${AppConfig.tokenKey}_fullName');
-    final storedRoles = await _storage.read(key: '${AppConfig.tokenKey}_roles');
-    if (stored != null) {
-      _token = stored;
-      _fullName = storedName;
-      if (storedRoles != null) {
-        _roles = storedRoles.split(',').where((r) => r.isNotEmpty).toList();
+    try {
+      final stored = await _storage.read(key: AppConfig.tokenKey);
+      final storedName = await _storage.read(key: '${AppConfig.tokenKey}_fullName');
+      final storedRoles = await _storage.read(key: '${AppConfig.tokenKey}_roles');
+      if (stored != null) {
+        _token = stored;
+        _fullName = storedName;
+        if (storedRoles != null) {
+          _roles = storedRoles.split(',').where((r) => r.isNotEmpty).toList();
+        }
+        notifyListeners();
       }
-      notifyListeners();
+    } catch (_) {
+      _token = null;
+      _fullName = null;
+      _roles = [];
     }
   }
 
@@ -45,7 +53,7 @@ class AuthService extends ChangeNotifier {
         Uri.parse('${AppConfig.apiUrl}/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(_requestTimeout);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -83,6 +91,10 @@ class AuthService extends ChangeNotifier {
         notifyListeners();
         return 'Erreur serveur (${response.statusCode})';
       }
+    } on TimeoutException {
+      _isLoading = false;
+      notifyListeners();
+      return 'Le serveur ne répond pas (délai dépassé).';
     } catch (e) {
       _isLoading = false;
       notifyListeners();

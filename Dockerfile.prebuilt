@@ -1,7 +1,7 @@
 # ── Lightweight: serve a prebuilt APK ──────────────────────────────
 # Build the APK on a developer machine first:
 #   flutter build apk --release \
-#     --dart-define=API_BASE_URL=https://10.187.22.27 \
+#     --dart-define=API_BASE_URL=https://std27.beaupeyrat.com \
 #     --dart-define=ALLOW_SELF_SIGNED=true
 # Then copy build/app/outputs/flutter-apk/app-release.apk to:
 #   prebuilt/app-release.apk
