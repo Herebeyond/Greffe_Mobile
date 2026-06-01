@@ -183,7 +183,7 @@ class _ConsultationFormScreenState extends State<ConsultationFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isEdit ? 'Consultation modifiÃ©e' : 'Consultation crÃ©Ã©e'),
+            content: Text(_isEdit ? 'Consultation modifiée' : 'Consultation créée'),
             backgroundColor: Colors.green,
           ),
         );
@@ -233,7 +233,7 @@ class _ConsultationFormScreenState extends State<ConsultationFormScreen> {
                     ? const LinearProgressIndicator()
                     : _patientDoctors.isEmpty
                         ? const Text(
-                            'Aucun mÃ©decin assignÃ© Ã  ce patient.',
+                            'Aucun médecin assigné à ce patient.',
                             style: TextStyle(color: Colors.orange),
                           )
                         : DropdownButtonFormField<String>(
@@ -318,10 +318,10 @@ class _ConsultationFormScreenState extends State<ConsultationFormScreen> {
               const SizedBox(height: 24),
 
               // File attachments
-              Text('PiÃ¨ces jointes', style: Theme.of(context).textTheme.titleSmall),
+              Text('Pièces jointes', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 4),
               Text(
-                'Les fichiers sont enregistrÃ©s sur le serveur et accessibles depuis toutes les interfaces.',
+                'Les fichiers sont enregistrés sur le serveur et accessibles depuis toutes les interfaces.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
               const SizedBox(height: 8),
@@ -349,7 +349,7 @@ class _ConsultationFormScreenState extends State<ConsultationFormScreen> {
                     dense: true,
                     leading: const Icon(Icons.insert_drive_file),
                     title: Text(name, overflow: TextOverflow.ellipsis),
-                    subtitle: const Text('Appuyer pour prÃ©visualiser', style: TextStyle(fontSize: 11)),
+                    subtitle: const Text('Appuyer pour prévisualiser', style: TextStyle(fontSize: 11)),
                     trailing: IconButton(
                       icon: const Icon(Icons.close, size: 18),
                       onPressed: () => setState(() => _filesToUpload.removeAt(i)),
@@ -367,7 +367,7 @@ class _ConsultationFormScreenState extends State<ConsultationFormScreen> {
                         height: 20, width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : Text(_isEdit ? 'Enregistrer' : 'CrÃ©er'),
+                    : Text(_isEdit ? 'Enregistrer' : 'Créer'),
               ),
             ],
           ),
