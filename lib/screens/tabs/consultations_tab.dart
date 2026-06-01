@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../models/consultation.dart';
+import '../../utils/date_formatter.dart';
 import '../../widgets/error_handler.dart';
 import '../consultation_detail_screen.dart';
 import '../consultation_form_screen.dart';
@@ -78,7 +79,7 @@ class _ConsultationsTabState extends State<ConsultationsTab> with AutomaticKeepA
                     child: ListTile(
                       leading: const Icon(Icons.medical_services_outlined),
                       title: Text(c.typeName ?? 'Consultation'),
-                      subtitle: Text('${c.date} — ${c.practitionerName}'),
+                      subtitle: Text('${AppDateFormatter.formatDateTime(c.date)} — ${c.practitionerName}'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         Navigator.of(context).push(

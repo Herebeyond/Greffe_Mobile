@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/transplant.dart';
+import '../utils/date_formatter.dart';
 import '../widgets/section_card.dart';
 
 class TransplantDetailScreen extends StatelessWidget {
@@ -29,7 +30,7 @@ class TransplantDetailScreen extends StatelessWidget {
             SectionCard(
               title: 'Informations générales',
               children: [
-                InfoRow(label: 'Date', value: t.transplantDate),
+                InfoRow(label: 'Date', value: AppDateFormatter.formatDateTime(t.transplantDate)),
                 InfoRow(label: 'Rang', value: t.rank.toString()),
                 InfoRow(label: 'Type de donneur', value: t.donorTypeName),
                 InfoRow(label: 'Type de greffe', value: t.transplantTypeName),
@@ -39,7 +40,7 @@ class TransplantDetailScreen extends StatelessWidget {
                   valueColor: t.isGraftFunctional ? Colors.green : Colors.red,
                 ),
                 if (!t.isGraftFunctional) ...[
-                  InfoRow(label: 'Date fin greffon', value: t.graftEndDate),
+                  InfoRow(label: 'Date fin greffon', value: AppDateFormatter.formatDateTime(t.graftEndDate)),
                   InfoRow(label: 'Cause fin', value: t.graftEndCause),
                 ],
               ],
@@ -50,7 +51,7 @@ class TransplantDetailScreen extends StatelessWidget {
               title: 'Détails chirurgicaux',
               children: [
                 InfoRow(label: 'Chirurgien', value: t.surgeonName),
-                InfoRow(label: 'Date déclampage', value: t.declampingDate),
+                InfoRow(label: 'Date déclampage', value: AppDateFormatter.formatDateTime(t.declampingDate)),
                 InfoRow(label: 'Heure déclampage', value: t.declampingTime),
                 InfoRow(label: 'Côté prélèvement', value: t.harvestSide),
                 InfoRow(label: 'Côté greffe', value: t.transplantSide),
@@ -113,7 +114,7 @@ class TransplantDetailScreen extends StatelessWidget {
               children: [
                 InfoRow(label: 'Dialyse', value: t.dialysis ? 'Oui' : 'Non'),
                 if (t.dialysis && t.lastDialysisDate != null)
-                  InfoRow(label: 'Dernière dialyse', value: t.lastDialysisDate),
+                  InfoRow(label: 'Dernière dialyse', value: AppDateFormatter.formatDateTime(t.lastDialysisDate)),
               ],
             ),
 

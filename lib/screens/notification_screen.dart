@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/notification.dart';
+import '../utils/date_formatter.dart';
 import '../widgets/error_handler.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -108,7 +109,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
               ),
               subtitle: Text(
-                '${n.createdAt ?? ''}'
+                '${AppDateFormatter.formatDateTime(n.createdAt)}'
                 '${n.triggeredByName != null ? ' — ${n.triggeredByName}' : ''}',
               ),
               trailing: n.isRead

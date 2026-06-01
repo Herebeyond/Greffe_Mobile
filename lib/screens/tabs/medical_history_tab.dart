@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../models/medical_history.dart';
+import '../../utils/date_formatter.dart';
 import '../../widgets/error_handler.dart';
 import '../../widgets/section_card.dart';
 
@@ -73,7 +74,8 @@ class _MedicalHistoryTabState extends State<MedicalHistoryTab> with AutomaticKee
             title: h.typeName ?? 'Antécédent',
             children: [
               InfoRow(label: 'Description', value: h.description),
-              if (h.diagnosisDate != null) InfoRow(label: 'Date diagnostic', value: h.diagnosisDate),
+              if (h.diagnosisDate != null)
+                InfoRow(label: 'Date diagnostic', value: AppDateFormatter.formatDateTime(h.diagnosisDate)),
               if (h.comment != null && h.comment!.isNotEmpty) InfoRow(label: 'Commentaire', value: h.comment),
             ],
           );

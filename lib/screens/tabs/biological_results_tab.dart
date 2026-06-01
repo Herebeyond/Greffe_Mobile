@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../models/biological_result.dart';
+import '../../utils/date_formatter.dart';
 import '../../widgets/error_handler.dart';
 import '../../widgets/section_card.dart';
 
@@ -70,7 +71,7 @@ class _BiologicalResultsTabState extends State<BiologicalResultsTab> with Automa
         itemBuilder: (context, index) {
           final r = _items[index];
           return SectionCard(
-            title: 'Prélèvement du ${r.date}',
+            title: 'Prélèvement du ${AppDateFormatter.formatDateTime(r.date)}',
             children: [
               if (r.creatinine != null) InfoRow(label: 'Créatinine', value: '${r.creatinine} µmol/L'),
               if (r.creatinineClearance != null) InfoRow(label: 'Clairance', value: '${r.creatinineClearance} mL/min'),

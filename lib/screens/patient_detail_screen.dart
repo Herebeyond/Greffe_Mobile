@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/patient.dart';
+import '../utils/date_formatter.dart';
 import '../widgets/section_card.dart';
 import 'tabs/consultations_tab.dart';
 import 'tabs/biological_results_tab.dart';
@@ -53,15 +53,7 @@ class _PatientInfoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? formattedBirth;
-    if (patient.birthDate != null) {
-      try {
-        final date = DateTime.parse(patient.birthDate!);
-        formattedBirth = DateFormat('dd/MM/yyyy').format(date);
-      } catch (_) {
-        formattedBirth = patient.birthDate;
-      }
-    }
+    final formattedBirth = AppDateFormatter.formatDateTime(patient.birthDate);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -83,7 +75,7 @@ class _PatientInfoTab extends StatelessWidget {
               InfoRow(label: 'N° de dossier', value: patient.fileNumber),
               if (patient.sex != null)
                 InfoRow(label: 'Sexe', value: patient.sex == 'M' ? 'Masculin' : 'Féminin'),
-              if (formattedBirth != null)
+              if (formattedBirth.isNotEmpty)
                 InfoRow(label: 'Date de naissance', value: formattedBirth),
               if (patient.city != null)
                 InfoRow(label: 'Ville', value: patient.city!),

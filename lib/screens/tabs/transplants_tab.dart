@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../models/transplant.dart';
+import '../../utils/date_formatter.dart';
 import '../../widgets/error_handler.dart';
 import '../transplant_detail_screen.dart';
 
@@ -85,7 +86,7 @@ class _TransplantsTabState extends State<TransplantsTab> with AutomaticKeepAlive
                 t.isGraftFunctional ? Icons.favorite : Icons.heart_broken,
                 color: t.isGraftFunctional ? Colors.green : Colors.red,
               ),
-              title: Text('Greffe n°${t.rank} — ${t.transplantDate}'),
+              title: Text('Greffe n°${t.rank} — ${AppDateFormatter.formatDateTime(t.transplantDate)}'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

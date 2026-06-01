@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../models/therapeutic_education.dart';
+import '../../utils/date_formatter.dart';
 import '../../widgets/error_handler.dart';
 import '../../widgets/section_card.dart';
 
@@ -72,12 +73,13 @@ class _TherapeuticEducationTabState extends State<TherapeuticEducationTab> with 
           return SectionCard(
             title: e.topicName ?? 'Session ETP',
             children: [
-              InfoRow(label: 'Date', value: e.sessionDate),
+              InfoRow(label: 'Date', value: AppDateFormatter.formatDateTime(e.sessionDate)),
               InfoRow(label: 'Éducateur', value: e.educator),
               if (e.objectives != null) InfoRow(label: 'Objectifs', value: e.objectives),
               if (e.observations != null) InfoRow(label: 'Observations', value: e.observations),
               if (e.patientProgressName != null) InfoRow(label: 'Progression', value: e.patientProgressName),
-              if (e.nextSessionDate != null) InfoRow(label: 'Prochaine session', value: e.nextSessionDate),
+              if (e.nextSessionDate != null)
+                InfoRow(label: 'Prochaine session', value: AppDateFormatter.formatDateTime(e.nextSessionDate)),
             ],
           );
         },

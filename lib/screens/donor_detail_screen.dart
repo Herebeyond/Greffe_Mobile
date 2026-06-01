@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/donor.dart';
+import '../utils/date_formatter.dart';
 import '../widgets/section_card.dart';
 
 class DonorDetailScreen extends StatelessWidget {
@@ -102,7 +103,7 @@ class DonorDetailScreen extends StatelessWidget {
               title: 'Détails chirurgicaux',
               children: [
                 InfoRow(label: 'Chirurgien', value: d.donorSurgeonName),
-                InfoRow(label: 'Date clampage', value: d.clampingDate),
+                InfoRow(label: 'Date clampage', value: AppDateFormatter.formatDateTime(d.clampingDate)),
                 InfoRow(label: 'Côté prélèvement', value: d.donorHarvestSide),
                 InfoRow(label: 'Machine perfusion', value: d.perfusionMachine),
                 InfoRow(label: 'Liquide perfusion', value: d.perfusionLiquidName),

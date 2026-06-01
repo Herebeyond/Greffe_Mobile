@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/consultation.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import '../utils/date_formatter.dart';
 import '../widgets/section_card.dart';
 
 class ConsultationDetailScreen extends StatelessWidget {
@@ -54,7 +55,7 @@ class ConsultationDetailScreen extends StatelessWidget {
             SectionCard(
               title: 'Informations',
               children: [
-                InfoRow(label: 'Date', value: c.date),
+                InfoRow(label: 'Date', value: AppDateFormatter.formatDateTime(c.date)),
                 InfoRow(label: 'Praticien', value: c.practitionerName),
                 InfoRow(label: 'Type', value: c.typeName),
               ],
@@ -73,7 +74,7 @@ class ConsultationDetailScreen extends StatelessWidget {
             if (c.nextAppointmentDate != null)
               SectionCard(
                 title: 'Prochain rendez-vous',
-                children: [Text(c.nextAppointmentDate!)],
+                children: [Text(AppDateFormatter.formatDateTime(c.nextAppointmentDate))],
               ),
             if (c.attachmentFilenames.isNotEmpty)
               SectionCard(
